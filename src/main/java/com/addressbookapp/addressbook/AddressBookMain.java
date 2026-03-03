@@ -40,7 +40,7 @@ public class AddressBookMain {
 
         addressBook.addContact(contact);
 
-        System.out.println("\nContact Added Successfully!");
+        System.out.println("\nDisplaying Contacts:");
         addressBook.displayContacts();
     }
 }
