@@ -59,4 +59,12 @@ public class AddressBook {
 
         System.out.println("Contact not found.");
     }
+    
+    
+    
+    public boolean deleteContact(String firstName) {
+
+        return contactList.removeIf(contact ->
+                contact.getFirstName().equalsIgnoreCase(firstName));
+    }
 }
