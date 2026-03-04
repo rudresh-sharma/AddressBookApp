@@ -6,51 +6,37 @@ public class AddressBookMain {
 
     public static void main(String[] args) {
 
-        System.out.println("Welcome to Address Book Program");
-
         Scanner scanner = new Scanner(System.in);
-        AddressBook addressBook = new AddressBook();
+        AddressBookManager manager = new AddressBookManager();
 
-        String choice;
+        while (true) {
 
-        do {
-            System.out.print("Enter First Name: ");
-            String firstName = scanner.nextLine();
+            System.out.println("\n1. Add Address Book");
+            System.out.println("2. Show Address Books");
+            System.out.println("3. Exit");
 
-            System.out.print("Enter Last Name: ");
-            String lastName = scanner.nextLine();
+            System.out.print("Enter choice: ");
+            int choice = Integer.parseInt(scanner.nextLine());
 
-            System.out.print("Enter Address: ");
-            String address = scanner.nextLine();
+            switch (choice) {
 
-            System.out.print("Enter City: ");
-            String city = scanner.nextLine();
+                case 1:
+                    System.out.print("Enter Address Book Name: ");
+                    String name = scanner.nextLine();
+                    manager.addAddressBook(name);
+                    break;
 
-            System.out.print("Enter State: ");
-            String state = scanner.nextLine();
+                case 2:
+                    manager.displayAddressBooks();
+                    break;
 
-            System.out.print("Enter Zip: ");
-            String zip = scanner.nextLine();
+                case 3:
+                    System.out.println("Exiting...");
+                    return;
 
-            System.out.print("Enter Phone Number: ");
-            String phone = scanner.nextLine();
-
-            System.out.print("Enter Email: ");
-            String email = scanner.nextLine();
-
-            Contact contact = new Contact(
-                    firstName, lastName, address,
-                    city, state, zip, phone, email
-            );
-
-            addressBook.addContact(contact);
-
-            System.out.print("Do you want to add another contact? (yes/no): ");
-            choice = scanner.nextLine();
-
-        } while (choice.equalsIgnoreCase("yes"));
-
-        System.out.println("\nAll Contacts:");
-        addressBook.displayContacts();
+                default:
+                    System.out.println("Invalid choice");
+            }
+        }
     }
 }
