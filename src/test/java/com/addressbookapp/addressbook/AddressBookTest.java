@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -292,6 +293,48 @@ class AddressBookTest {
 
         assertEquals(2, result.size());
     }
+    
+    
+    /* =================================
+     * 		UC 9
+     * =====================================
+     */
 
+    
+    @Test
+    void givenMultipleContacts_whenGroupedByCity_shouldReturnProperMap() {
+
+        AddressBookManager manager = new AddressBookManager();
+        manager.addAddressBook("Personal");
+
+        AddressBook book = manager.getAddressBook("Personal");
+
+        book.addContact(new Contact(
+                "Ravi", "Kumar", "Addr",
+                "Delhi", "Delhi", "110001",
+                "9999999999", "ravi@gmail.com"
+        ));
+
+        book.addContact(new Contact(
+                "Aman", "Verma", "Addr2",
+                "Delhi", "Delhi", "110002",
+                "8888888888", "aman@gmail.com"
+        ));
+
+        Map<String, List<Contact>> cityMap =
+                manager.getPersonsGroupedByCity();
+
+        assertEquals(2, cityMap.get("Delhi").size());
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }
+
 
