@@ -1,17 +1,18 @@
-package com.addressbookapp.addressbook;
+package com.addressbookapp.service;
 
+import com.addressbookapp.model.Contact;
+
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+class AddressBookServiceTest {
 
-class AddressBookTest {
-
-    private AddressBook addressBook;
+    private AddressBookService addressBookService;
 
     @BeforeEach
     void setUp() {
-        addressBook = new AddressBook();
+        addressBookService = new AddressBookService();
     }
 
     // ---------------- UC1 ----------------
@@ -51,10 +52,10 @@ class AddressBookTest {
                 "aman@gmail.com"
         );
 
-        addressBook.addContact(contact);
+        addressBookService.addContact(contact);
 
-        assertEquals(1, addressBook.getContactList().size());
-        assertEquals("Aman", addressBook.getContactList().get(0).getFirstName());
+        assertEquals(1, addressBookService.getContactList().size());
+        assertEquals("Aman", addressBookService.getContactList().get(0).getFirstName());
     }
 
    
