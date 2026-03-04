@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.util.List;
 import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -255,6 +256,41 @@ class AddressBookTest {
 
         assertFalse(added);
         assertEquals(1, addressBook.getContactList().size());
+    }
+    
+    
+    
+    /* ==============================
+     * 			UC 8
+     * ==============================
+     */
+
+    @Test
+    void givenMultipleAddressBooks_whenSearchByCity_shouldReturnMatchingContacts() {
+
+        AddressBookManager manager = new AddressBookManager();
+
+        manager.addAddressBook("Personal");
+        manager.addAddressBook("Office");
+
+        AddressBook personal = manager.getAddressBook("Personal");
+        AddressBook office = manager.getAddressBook("Office");
+
+        personal.addContact(new Contact(
+                "Ravi", "Kumar", "Addr",
+                "Delhi", "Delhi", "110001",
+                "9999999999", "ravi@gmail.com"
+        ));
+
+        office.addContact(new Contact(
+                "Aman", "Verma", "Addr2",
+                "Delhi", "Delhi", "110002",
+                "8888888888", "aman@gmail.com"
+        ));
+
+        List<Contact> result = manager.searchByCity("Delhi");
+
+        assertEquals(2, result.size());
     }
 
 }

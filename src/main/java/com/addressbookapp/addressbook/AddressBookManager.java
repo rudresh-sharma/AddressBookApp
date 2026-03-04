@@ -1,6 +1,7 @@
 package com.addressbookapp.addressbook;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AddressBookManager {
@@ -19,6 +20,21 @@ public class AddressBookManager {
         return true;
     }
 
+    public List<Contact> searchByCity(String city) {
+
+        return addressBookMap.values().stream()
+                .flatMap(addressBook -> addressBook.getContactList().stream())
+                .filter(contact -> contact.getCity().equalsIgnoreCase(city))
+                .toList();
+    }
+    
+    public List<Contact> searchByState(String state) {
+
+        return addressBookMap.values().stream()
+                .flatMap(addressBook -> addressBook.getContactList().stream())
+                .filter(contact -> contact.getState().equalsIgnoreCase(state))
+                .toList();
+    }
     public AddressBook getAddressBook(String name) {
         return addressBookMap.get(name);
     }
