@@ -200,6 +200,32 @@ class AddressBookTest {
     }
     
     
+    /* =====================================
+     * 			UC - 6
+     * ====================================
+     */
+    		
     
+    @Test
+    void givenUniqueName_whenAddressBookAdded_shouldStoreInMap() {
+
+        AddressBookManager manager = new AddressBookManager();
+
+        boolean added = manager.addAddressBook("Personal");
+
+        assertTrue(added);
+        assertNotNull(manager.getAddressBook("Personal"));
+    }
+
+    @Test
+    void givenDuplicateName_whenAdded_shouldReturnFalse() {
+
+        AddressBookManager manager = new AddressBookManager();
+
+        manager.addAddressBook("Office");
+        boolean addedAgain = manager.addAddressBook("Office");
+
+        assertFalse(addedAgain);
+    }
     
 }
