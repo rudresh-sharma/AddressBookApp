@@ -81,4 +81,22 @@ public class Contact {
                 " - " + zip + ", Phone: " + phoneNumber +
                 ", Email: " + email;
     }
+	
+	@Override
+	public boolean equals(Object obj) {
+
+	    if (this == obj) return true;
+
+	    if (obj == null || getClass() != obj.getClass()) return false;
+
+	    Contact contact = (Contact) obj;
+
+	    return this.firstName.equalsIgnoreCase(contact.firstName) &&
+	           this.lastName.equalsIgnoreCase(contact.lastName);
+	}
+
+	@Override
+	public int hashCode() {
+	    return (firstName.toLowerCase() + lastName.toLowerCase()).hashCode();
+	}
 }
