@@ -228,4 +228,34 @@ class AddressBookTest {
         assertFalse(addedAgain);
     }
     
+    
+    
+    /* ==================================
+     * 			UC 7
+     *	====================================
+     */
+    
+    @Test
+    void givenDuplicateContact_whenAdded_shouldNotBeAdded() {
+
+        Contact contact1 = new Contact(
+                "Ravi", "Kumar", "Addr",
+                "City", "State", "123456",
+                "9999999999", "ravi@gmail.com"
+        );
+
+        Contact contact2 = new Contact(
+                "Ravi", "Kumar", "Addr2",
+                "City2", "State2", "654321",
+                "8888888888", "ravi2@gmail.com"
+        );
+
+        addressBook.addContact(contact1);
+        boolean added = addressBook.addContact(contact2);
+
+        assertFalse(added);
+        assertEquals(1, addressBook.getContactList().size());
+    }
+
 }
+
