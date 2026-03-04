@@ -138,4 +138,37 @@ class AddressBookTest {
         assertEquals("Test",
                 addressBook.getContactList().get(0).getFirstName());
     }
+    
+    
+    // UC -4 TEST CASES
+    
+    @Test
+    void givenExistingContact_whenDeleted_shouldRemoveFromList() {
+
+        Contact contact = new Contact(
+                "Ravi",
+                "Kumar",
+                "Address",
+                "City",
+                "State",
+                "123456",
+                "9999999999",
+                "ravi@gmail.com"
+        );
+
+        addressBook.addContact(contact);
+
+        boolean deleted = addressBook.deleteContact("Ravi");
+
+        assertTrue(deleted);
+        assertEquals(0, addressBook.getContactList().size());
+    }
+
+    @Test
+    void givenNonExistingContact_whenDeleteAttempted_shouldReturnFalse() {
+
+        boolean deleted = addressBook.deleteContact("Unknown");
+
+        assertFalse(deleted);
+    }
 }
