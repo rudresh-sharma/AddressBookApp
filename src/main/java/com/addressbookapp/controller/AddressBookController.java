@@ -1,0 +1,85 @@
+package com.addressbookapp.controller;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.addressbookapp.model.Contact;
+import com.addressbookapp.service.AddressBookService;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/address-books")
+public class AddressBookController {
+
+    private final AddressBookService addressBookService;
+
+    public AddressBookController(AddressBookService addressBookService) {
+        this.addressBookService = addressBookService;
+    }
+
+    @PostMapping("/{name}")
+    public Map<String, String> addAddressBook(@PathVariable String name) {
+        boolean added = addressBookService.addAddressBook(name);
+        return added
+                ? Map.of("message", "Address Book added successfully")
+                : Map.of("message", "Address Book with this name already exists");
+    }
+
+    @GetMapping
+    public Set<String> getAddressBooks() {
+        return addressBookService.getAddressBookNames();
+    }
+
+    @GetMapping("/{name}/contacts")
+    public List<Contact> getContacts(@PathVariable String name) {
+        List<Contact> contacts = addressBookService.getContacts(name);
+        return contacts == null ? List.of() : contacts;
+    }
+
+    @PostMapping("/{name}/contacts")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Map<String, Object> addContact(@PathVariable String name, @RequestBody Contact contact) {
+        Contact created = addressBookService.addContact(name, contact);
+        return created == null
+                ? Map.of("message", "Address Book not found")
+                : Map.of("message", "Contact added successfully", "contact", created);
+    }
+
+    @PostMapping("/{name}/contacts/bulk")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Map<String, Object> addContacts(@PathVariable String name, @RequestBody List<Contact> contacts) {
+        List<Contact> created = addressBookService.addContacts(name, contacts);
+        return created == null
+                ? Map.of("message", "Address Book not found")
+                : Map.of("message", "Contacts added successfully", "contacts", created);
+    }
+
+    @PutMapping("/{name}/contacts/{firstName}")
+    public Map<String, String> editContact(@PathVariable String name,
+                                           @PathVariable String firstName,
+                                           @RequestBody Contact updatedContact) {
+        boolean updated = addressBookService.editContact(name, firstName, updatedContact);
+        return updated
+                ? Map.of("message", "Contact updated successfully")
+                : Map.of("message", "Contact or Address Book not found");
+    }
+
+    @DeleteMapping("/{name}/contacts/{firstName}")
+    public Map<String, String> deleteContact(@PathVariable String name,
+                                             @PathVariable String firstName) {
+        boolean deleted = addressBookService.deleteContact(name, firstName);
+        return deleted
+                ? Map.of("message", "Contact deleted successfully")
+                : Map.of("message", "Contact or Address Book not found");
+    }
+}
