@@ -14,4 +14,8 @@ public class AddressBook {
     public void displayContacts() {
         contacts.forEach(System.out::println);
     }
+    
+    public List<Contact> getContactList() {
+        return contacts;
+    }
 }
