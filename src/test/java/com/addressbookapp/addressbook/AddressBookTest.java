@@ -171,4 +171,35 @@ class AddressBookTest {
 
         assertFalse(deleted);
     }
+    
+    
+    
+    // =======================================
+    // 				UC-5
+    // =======================================
+    
+    @Test
+    void givenMultipleContacts_whenAdded_shouldStoreAll() {
+
+        Contact contact1 = new Contact(
+                "Ravi", "Kumar", "Addr1",
+                "Delhi", "Delhi", "110001",
+                "9999999999", "ravi@gmail.com"
+        );
+
+        Contact contact2 = new Contact(
+                "Aman", "Verma", "Addr2",
+                "Indore", "MP", "452001",
+                "8888888888", "aman@gmail.com"
+        );
+
+        addressBook.addContact(contact1);
+        addressBook.addContact(contact2);
+
+        assertEquals(2, addressBook.getContactList().size());
+    }
+    
+    
+    
+    
 }

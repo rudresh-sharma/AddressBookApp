@@ -11,60 +11,46 @@ public class AddressBookMain {
         Scanner scanner = new Scanner(System.in);
         AddressBook addressBook = new AddressBook();
 
-        System.out.print("Enter First Name: ");
-        String firstName = scanner.nextLine();
+        String choice;
 
-        System.out.print("Enter Last Name: ");
-        String lastName = scanner.nextLine();
+        do {
+            System.out.print("Enter First Name: ");
+            String firstName = scanner.nextLine();
 
-        System.out.print("Enter Address: ");
-        String address = scanner.nextLine();
+            System.out.print("Enter Last Name: ");
+            String lastName = scanner.nextLine();
 
-        System.out.print("Enter City: ");
-        String city = scanner.nextLine();
+            System.out.print("Enter Address: ");
+            String address = scanner.nextLine();
 
-        System.out.print("Enter State: ");
-        String state = scanner.nextLine();
+            System.out.print("Enter City: ");
+            String city = scanner.nextLine();
 
-        System.out.print("Enter Zip: ");
-        String zip = scanner.nextLine();
+            System.out.print("Enter State: ");
+            String state = scanner.nextLine();
 
-        System.out.print("Enter Phone Number: ");
-        String phone = scanner.nextLine();
+            System.out.print("Enter Zip: ");
+            String zip = scanner.nextLine();
 
-        System.out.print("Enter Email: ");
-        String email = scanner.nextLine();
+            System.out.print("Enter Phone Number: ");
+            String phone = scanner.nextLine();
 
-        Contact contact = new Contact(firstName, lastName, address,
-                city, state, zip, phone, email);
+            System.out.print("Enter Email: ");
+            String email = scanner.nextLine();
 
-        addressBook.addContact(contact);
+            Contact contact = new Contact(
+                    firstName, lastName, address,
+                    city, state, zip, phone, email
+            );
 
-        System.out.println("\nDisplaying Contacts:");
-        addressBook.displayContacts();
-        
-        System.out.print("Enter First Name of contact to edit: ");
-        String nameToEdit = scanner.nextLine();
+            addressBook.addContact(contact);
 
-        addressBook.editContact(nameToEdit, scanner);
+            System.out.print("Do you want to add another contact? (yes/no): ");
+            choice = scanner.nextLine();
 
-        System.out.println("\nUpdated Contact List:");
-        addressBook.displayContacts();
-        
-        
-        
-        System.out.print("Enter First Name to delete: ");
-        String nameToDelete = scanner.nextLine();
+        } while (choice.equalsIgnoreCase("yes"));
 
-        boolean deleted = addressBook.deleteContact(nameToDelete);
-
-        if (deleted) {
-            System.out.println("Contact deleted successfully!");
-        } else {
-            System.out.println("Contact not found.");
-        }
-
-        System.out.println("\nUpdated Contact List:");
+        System.out.println("\nAll Contacts:");
         addressBook.displayContacts();
     }
 }
