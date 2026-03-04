@@ -1,20 +1,20 @@
-package com.addressbookapp.addressbook;
+package com.addressbookapp.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
-import java.util.Scanner;
+import java.util.List;
 
+import com.addressbookapp.model.Contact;
 import static org.junit.jupiter.api.Assertions.*;
 
-class AddressBookTest {
+class AddressBookServiceTest {
 
-    private AddressBook addressBook;
+    private AddressBookService addressBookService;
 
     @BeforeEach
     void setUp() {
-        addressBook = new AddressBook();
+        addressBookService = new AddressBookService();
     }
 
     // =========================
@@ -56,11 +56,11 @@ class AddressBookTest {
                 "aman@gmail.com"
         );
 
-        addressBook.addContact(contact);
+        addressBookService.addContact(contact);
 
-        assertEquals(1, addressBook.getContactList().size());
+        assertEquals(1, addressBookService.getContactList().size());
         assertEquals("Aman",
-                addressBook.getContactList().get(0).getFirstName());
+                addressBookService.getContactList().get(0).getFirstName());
     }
 
     // =========================
@@ -80,24 +80,18 @@ class AddressBookTest {
                 "ravi@gmail.com"
         );
 
-        addressBook.addContact(contact);
+        addressBookService.addContact(contact);
 
-        // Simulated console input
-        String simulatedInput =
-                "New Address\n" +
-                "Mumbai\n" +
-                "Maharashtra\n" +
-                "400001\n" +
-                "8888888888\n" +
-                "newravi@gmail.com\n";
+        Contact updatedData = new Contact(
+                "Ravi", "Kumar", "New Address",
+                "Mumbai", "Maharashtra", "400001",
+                "8888888888", "newravi@gmail.com"
+        );
 
-        Scanner scanner =
-                new Scanner(new ByteArrayInputStream(simulatedInput.getBytes()));
+        boolean edited = addressBookService.editContact("Ravi", updatedData);
+        Contact updatedContact = addressBookService.getContactList().get(0);
 
-        addressBook.editContact("Ravi", scanner);
-
-        Contact updatedContact = addressBook.getContactList().get(0);
-
+        assertTrue(edited);
         assertEquals("New Address", updatedContact.getAddress());
         assertEquals("Mumbai", updatedContact.getCity());
         assertEquals("Maharashtra", updatedContact.getState());
@@ -123,20 +117,21 @@ class AddressBookTest {
                 "test@gmail.com"
         );
 
-        addressBook.addContact(contact);
+        addressBookService.addContact(contact);
 
-        String simulatedInput =
-                "Address\nCity\nState\n123\nPhone\nEmail\n";
+        Contact updatedData = new Contact(
+                "Test", "User", "Address 2",
+                "City 2", "State 2", "654321",
+                "2222222222", "test2@gmail.com"
+        );
 
-        Scanner scanner =
-                new Scanner(new ByteArrayInputStream(simulatedInput.getBytes()));
-
-        addressBook.editContact("Unknown", scanner);
+        boolean edited = addressBookService.editContact("Unknown", updatedData);
 
         // List size should remain 1
-        assertEquals(1, addressBook.getContactList().size());
+        assertFalse(edited);
+        assertEquals(1, addressBookService.getContactList().size());
         assertEquals("Test",
-                addressBook.getContactList().get(0).getFirstName());
+                addressBookService.getContactList().get(0).getFirstName());
     }
     
     
@@ -156,18 +151,18 @@ class AddressBookTest {
                 "ravi@gmail.com"
         );
 
-        addressBook.addContact(contact);
+        addressBookService.addContact(contact);
 
-        boolean deleted = addressBook.deleteContact("Ravi");
+        boolean deleted = addressBookService.deleteContact("Ravi");
 
         assertTrue(deleted);
-        assertEquals(0, addressBook.getContactList().size());
+        assertEquals(0, addressBookService.getContactList().size());
     }
 
     @Test
     void givenNonExistingContact_whenDeleteAttempted_shouldReturnFalse() {
 
-        boolean deleted = addressBook.deleteContact("Unknown");
+        boolean deleted = addressBookService.deleteContact("Unknown");
 
         assertFalse(deleted);
     }
@@ -193,10 +188,9 @@ class AddressBookTest {
                 "8888888888", "aman@gmail.com"
         );
 
-        addressBook.addContact(contact1);
-        addressBook.addContact(contact2);
+        addressBookService.addContacts(List.of(contact1, contact2));
 
-        assertEquals(2, addressBook.getContactList().size());
+        assertEquals(2, addressBookService.getContactList().size());
     }
     
     
