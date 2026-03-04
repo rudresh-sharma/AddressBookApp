@@ -3,6 +3,7 @@ package com.addressbookapp.addressbook;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class AddressBookManager {
 
@@ -35,6 +36,22 @@ public class AddressBookManager {
                 .filter(contact -> contact.getState().equalsIgnoreCase(state))
                 .toList();
     }
+    
+    public Map<String, List<Contact>> getPersonsGroupedByCity() {
+
+        return addressBookMap.values().stream()
+                .flatMap(addressBook -> addressBook.getContactList().stream())
+                .collect(Collectors.groupingBy(Contact::getCity));
+    }
+    
+    public Map<String, List<Contact>> getPersonsGroupedByState() {
+
+        return addressBookMap.values().stream()
+                .flatMap(addressBook -> addressBook.getContactList().stream())
+                .collect(Collectors.groupingBy(Contact::getState));
+    }
+    
+    
     public AddressBook getAddressBook(String name) {
         return addressBookMap.get(name);
     }
