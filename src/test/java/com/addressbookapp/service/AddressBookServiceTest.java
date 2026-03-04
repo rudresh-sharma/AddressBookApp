@@ -99,10 +99,14 @@ class AddressBookServiceTest {
         List<Contact> stateResult = service.searchByState("Delhi");
         Map<String, List<Contact>> groupedCity = service.getPersonsGroupedByCity();
         Map<String, List<Contact>> groupedState = service.getPersonsGroupedByState();
+        Map<String, Long> cityCount = service.getPersonCountByCity();
+        Map<String, Long> stateCount = service.getPersonCountByState();
 
         assertEquals(2, cityResult.size());
         assertEquals(2, stateResult.size());
         assertEquals(2, groupedCity.get("Delhi").size());
         assertEquals(2, groupedState.get("Delhi").size());
+        assertEquals(2L, cityCount.get("Delhi"));
+        assertEquals(2L, stateCount.get("Delhi"));
     }
 }

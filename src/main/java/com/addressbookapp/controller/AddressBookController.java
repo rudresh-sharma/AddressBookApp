@@ -3,7 +3,6 @@ package com.addressbookapp.controller;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.addressbookapp.model.Contact;
 import com.addressbookapp.service.AddressBookService;
@@ -66,14 +65,12 @@ public class AddressBookController {
 
     @GetMapping("/contacts/count/city")
     public Map<String, Long> countByCity() {
-        return addressBookService.getPersonsGroupedByCity().entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> (long) e.getValue().size()));
+        return addressBookService.getPersonCountByCity();
     }
 
     @GetMapping("/contacts/count/state")
     public Map<String, Long> countByState() {
-        return addressBookService.getPersonsGroupedByState().entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> (long) e.getValue().size()));
+        return addressBookService.getPersonCountByState();
     }
 
     @GetMapping("/{name}/contacts")
