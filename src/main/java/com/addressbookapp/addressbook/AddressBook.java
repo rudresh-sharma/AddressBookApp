@@ -15,9 +15,19 @@ public class AddressBook {
     
     
     
-    public void addContact(Contact contact) {
-        contactList.add(contact);
+    public boolean addContact(Contact newContact) {
+
+        boolean exists = contactList.stream()
+                .anyMatch(contact -> contact.equals(newContact));
+
+        if (exists) {
+            System.out.println("Duplicate contact found. Cannot add!");
+            return false;
+        }
+
+        contactList.add(newContact);
         System.out.println("Contact added successfully!");
+        return true;
     }
 
     public void displayContacts() {
