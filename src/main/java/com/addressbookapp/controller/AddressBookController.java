@@ -73,10 +73,20 @@ public class AddressBookController {
         return addressBookService.getPersonCountByState();
     }
 
+    @GetMapping("/contacts/sort/name")
+    public List<Contact> getAllContactsSortedByName() {
+        return addressBookService.getAllContactsSortedByName();
+    }
+
     @GetMapping("/{name}/contacts")
     public List<Contact> getContacts(@PathVariable String name) {
         List<Contact> contacts = addressBookService.getContacts(name);
         return contacts == null ? List.of() : contacts;
+    }
+
+    @GetMapping("/{name}/contacts/sort/name")
+    public List<Contact> getContactsSortedByName(@PathVariable String name) {
+        return addressBookService.getContactsSortedByName(name);
     }
 
     @PostMapping("/{name}/contacts")

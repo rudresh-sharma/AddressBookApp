@@ -35,6 +35,7 @@ class AddressBookControllerTest {
         Map<String, List<Contact>> groupedState = controller.viewByState();
         Map<String, Long> cityCount = controller.countByCity();
         Map<String, Long> stateCount = controller.countByState();
+        List<Contact> sortedByName = controller.getAllContactsSortedByName();
 
         assertEquals(2, byCity.size());
         assertEquals(2, byState.size());
@@ -42,6 +43,8 @@ class AddressBookControllerTest {
         assertEquals(2, groupedState.get("Delhi").size());
         assertEquals(2L, cityCount.get("Delhi"));
         assertEquals(2L, stateCount.get("Delhi"));
+        assertEquals("Aman", sortedByName.get(0).getFirstName());
+        assertEquals("Ravi", sortedByName.get(1).getFirstName());
         assertTrue(controller.getAddressBooks().contains("Personal"));
     }
 }

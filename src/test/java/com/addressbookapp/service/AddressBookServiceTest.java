@@ -109,4 +109,17 @@ class AddressBookServiceTest {
         assertEquals(2L, cityCount.get("Delhi"));
         assertEquals(2L, stateCount.get("Delhi"));
     }
+
+    @Test
+    void givenContacts_whenSortedByName_shouldReturnAlphabeticalOrder() {
+        service.addContact("Default", new Contact("Ravi", "Kumar", "Addr1", "Delhi", "Delhi", "110001", "9999999999", "ravi@gmail.com"));
+        service.addContact("Default", new Contact("Aman", "Verma", "Addr2", "Indore", "MP", "452001", "8888888888", "aman@gmail.com"));
+        service.addContact("Default", new Contact("Ankit", "Sharma", "Addr3", "Bhopal", "MP", "462001", "7777777777", "ankit@gmail.com"));
+
+        List<Contact> sorted = service.getContactsSortedByName("Default");
+
+        assertEquals("Aman", sorted.get(0).getFirstName());
+        assertEquals("Ankit", sorted.get(1).getFirstName());
+        assertEquals("Ravi", sorted.get(2).getFirstName());
+    }
 }
