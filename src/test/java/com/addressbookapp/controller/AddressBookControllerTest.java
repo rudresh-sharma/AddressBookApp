@@ -199,4 +199,22 @@ class AddressBookControllerTest {
         assertEquals("Contact added to database successfully", response.get("message"));
         assertEquals(contact, dbContact);
     }
+
+    @Test
+    void shouldSupportUc21AddMultipleContactsToDatabaseUsingThreads() {
+        List<Contact> contacts = List.of(
+                new Contact("Rudresh", "Sharma", "Street 1", "Indore", "MP", "452001", "9000000001", "rudresh@gmail.com"),
+                new Contact("Aman", "Verma", "Street 2", "Bhopal", "MP", "462001", "9000000002", "aman@gmail.com"),
+                new Contact("Ravi", "Kumar", "Street 3", "Delhi", "Delhi", "110001", "9000000003", "ravi@gmail.com")
+        );
+
+        Map<String, String> response = controller.addContactsToDatabase("ThreadBookUc21", contacts);
+        List<Contact> dbContacts = controller.getAllEntriesFromDatabase();
+
+        assertEquals("Contacts added to database using threads", response.get("message"));
+        assertEquals("3", response.get("addedCount"));
+        assertTrue(dbContacts.stream().anyMatch(contact -> "Rudresh".equals(contact.getFirstName())));
+        assertTrue(dbContacts.stream().anyMatch(contact -> "Aman".equals(contact.getFirstName())));
+        assertTrue(dbContacts.stream().anyMatch(contact -> "Ravi".equals(contact.getFirstName())));
+    }
 }
