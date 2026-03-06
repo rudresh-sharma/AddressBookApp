@@ -197,6 +197,15 @@ public class AddressBookController {
                 : Map.of("message", "Duplicate contact found or Address Book not found");
     }
 
+    @PostMapping("/{name}/db/contacts")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Map<String, String> addContactToDatabase(@PathVariable String name, @RequestBody Contact contact) {
+        boolean added = addressBookDbService.addContactToAddressBookDb(name, contact);
+        return added
+                ? Map.of("message", "Contact added to database successfully")
+                : Map.of("message", "Duplicate contact found in database");
+    }
+
     @PostMapping("/{name}/contacts/bulk")
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, String> addContacts(@PathVariable String name, @RequestBody List<Contact> contacts) {
