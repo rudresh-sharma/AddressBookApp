@@ -166,4 +166,24 @@ class AddressBookControllerTest {
         assertTrue(todayContacts.size() >= 2);
         assertEquals(0, oldRangeContacts.size());
     }
+
+    @Test
+    void shouldSupportUc19CountContactsByCityOrStateFromDb() {
+        Map<String, Long> beforeCityCounts = controller.countByCityFromDatabase();
+        Map<String, Long> beforeStateCounts = controller.countByStateFromDatabase();
+
+        dbService.saveAddressBookWithContacts("CountBookUc19", List.of(
+                new Contact("Rudresh", "Sharma", "Street 1", "Indore", "MP", "452001", "9000000001", "rudresh@gmail.com"),
+                new Contact("Aman", "Verma", "Street 2", "Indore", "MP", "452002", "9000000002", "aman@gmail.com"),
+                new Contact("Ravi", "Kumar", "Street 3", "Delhi", "Delhi", "110001", "9000000003", "ravi@gmail.com")
+        ));
+
+        Map<String, Long> cityCounts = controller.countByCityFromDatabase();
+        Map<String, Long> stateCounts = controller.countByStateFromDatabase();
+
+        assertEquals(beforeCityCounts.getOrDefault("Indore", 0L) + 2L, cityCounts.get("Indore"));
+        assertEquals(beforeCityCounts.getOrDefault("Delhi", 0L) + 1L, cityCounts.get("Delhi"));
+        assertEquals(beforeStateCounts.getOrDefault("MP", 0L) + 2L, stateCounts.get("MP"));
+        assertEquals(beforeStateCounts.getOrDefault("Delhi", 0L) + 1L, stateCounts.get("Delhi"));
+    }
 }
