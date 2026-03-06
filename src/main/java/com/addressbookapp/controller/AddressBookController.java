@@ -206,6 +206,13 @@ public class AddressBookController {
                 : Map.of("message", "Duplicate contact found in database");
     }
 
+    @PostMapping("/{name}/db/contacts/bulk")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Map<String, String> addContactsToDatabase(@PathVariable String name, @RequestBody List<Contact> contacts) {
+        int addedCount = addressBookDbService.addContactsToAddressBookDbUsingThreads(name, contacts);
+        return Map.of("message", "Contacts added to database using threads", "addedCount", String.valueOf(addedCount));
+    }
+
     @PostMapping("/{name}/contacts/bulk")
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, String> addContacts(@PathVariable String name, @RequestBody List<Contact> contacts) {
