@@ -83,6 +83,33 @@ public class AddressBookDbService {
         return addressBookRepository.save(addressBook);
     }
 
+    @Transactional
+    public boolean addContactToAddressBookDb(String addressBookName, Contact contact) {
+        Optional<ContactEntity> existingContact =
+                contactRepository.findFirstByAddressBook_NameIgnoreCaseAndFirstNameIgnoreCaseAndLastNameIgnoreCase(
+                        addressBookName, contact.getFirstName(), contact.getLastName());
+        if (existingContact.isPresent()) {
+            return false;
+        }
+
+        AddressBookEntity addressBook = addressBookRepository.findByName(addressBookName)
+                .orElseGet(() -> addressBookRepository.save(new AddressBookEntity(addressBookName)));
+
+        ContactEntity contactEntity = new ContactEntity(
+                contact.getFirstName(),
+                contact.getLastName(),
+                contact.getAddress(),
+                contact.getCity(),
+                contact.getState(),
+                contact.getZip(),
+                contact.getPhoneNumber(),
+                contact.getEmail()
+        );
+        addressBook.addContact(contactEntity);
+        addressBookRepository.save(addressBook);
+        return true;
+    }
+
     @Transactional(readOnly = true)
     public Contact getContactFromDb(String addressBookName, String firstName) {
         return contactRepository.findFirstByAddressBook_NameIgnoreCaseAndFirstNameIgnoreCase(addressBookName, firstName)
