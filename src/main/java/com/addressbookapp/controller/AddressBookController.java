@@ -78,6 +78,21 @@ public class AddressBookController {
         return addressBookService.getAllContactsSortedByName();
     }
 
+    @GetMapping("/contacts/sort/city")
+    public List<Contact> getAllContactsSortedByCity() {
+        return addressBookService.getAllContactsSortedByCity();
+    }
+
+    @GetMapping("/contacts/sort/state")
+    public List<Contact> getAllContactsSortedByState() {
+        return addressBookService.getAllContactsSortedByState();
+    }
+
+    @GetMapping("/contacts/sort/zip")
+    public List<Contact> getAllContactsSortedByZip() {
+        return addressBookService.getAllContactsSortedByZip();
+    }
+
     @GetMapping("/{name}/contacts")
     public List<Contact> getContacts(@PathVariable String name) {
         List<Contact> contacts = addressBookService.getContacts(name);
@@ -87,6 +102,21 @@ public class AddressBookController {
     @GetMapping("/{name}/contacts/sort/name")
     public List<Contact> getContactsSortedByName(@PathVariable String name) {
         return addressBookService.getContactsSortedByName(name);
+    }
+
+    @GetMapping("/{name}/contacts/sort/city")
+    public List<Contact> getContactsSortedByCity(@PathVariable String name) {
+        return addressBookService.getContactsSortedByCity(name);
+    }
+
+    @GetMapping("/{name}/contacts/sort/state")
+    public List<Contact> getContactsSortedByState(@PathVariable String name) {
+        return addressBookService.getContactsSortedByState(name);
+    }
+
+    @GetMapping("/{name}/contacts/sort/zip")
+    public List<Contact> getContactsSortedByZip(@PathVariable String name) {
+        return addressBookService.getContactsSortedByZip(name);
     }
 
     @PostMapping("/{name}/contacts")
