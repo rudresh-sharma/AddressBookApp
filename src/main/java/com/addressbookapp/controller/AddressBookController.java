@@ -103,6 +103,16 @@ public class AddressBookController {
         return addressBookDbService.retrieveAllEntriesFromDb();
     }
 
+    @GetMapping("/db/contacts/count/city")
+    public Map<String, Long> countByCityFromDatabase() {
+        return addressBookDbService.getPersonCountByCityFromDb();
+    }
+
+    @GetMapping("/db/contacts/count/state")
+    public Map<String, Long> countByStateFromDatabase() {
+        return addressBookDbService.getPersonCountByStateFromDb();
+    }
+
     @GetMapping("/db/contacts/by-date")
     public List<Contact> getContactsAddedInPeriod(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
