@@ -150,11 +150,11 @@ class AddressBookServiceTest {
 
     @Test
     void givenAddressBook_whenWrittenAndReadViaFileIo_shouldPersistContacts() throws Exception {
-        service.addContact("Default", new Contact("Aman", "Verma", "Street 1", "Indore", "MP", "452001", "9000000001", "aman@gmail.com"));
+        service.addContact("Default", new Contact("Aman", "Verma", "Street 1, Sector A", "Indore", "MP", "452001", "9000000001", "aman@gmail.com"));
         service.addContact("Default", new Contact("Ravi", "Kumar", "Street 2", "Delhi", "Delhi", "110001", "9000000002", "ravi@gmail.com"));
         service.addAddressBook("Imported");
 
-        Path tempFile = Files.createTempFile("addressbook-uc13-", ".txt");
+        Path tempFile = Files.createTempFile("addressbook-uc14-", ".csv");
         try {
             boolean written = service.writeContactsToFile("Default", tempFile.toString());
             int addedCount = service.readContactsFromFile("Imported", tempFile.toString());
@@ -162,6 +162,7 @@ class AddressBookServiceTest {
             assertTrue(written);
             assertEquals(2, addedCount);
             assertEquals(2, service.getContacts("Imported").size());
+            assertEquals("Street 1, Sector A", service.getContacts("Imported").get(0).getAddress());
         } finally {
             Files.deleteIfExists(tempFile);
         }
