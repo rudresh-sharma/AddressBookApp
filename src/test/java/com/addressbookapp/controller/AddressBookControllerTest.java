@@ -186,4 +186,17 @@ class AddressBookControllerTest {
         assertEquals(beforeStateCounts.getOrDefault("MP", 0L) + 2L, stateCounts.get("MP"));
         assertEquals(beforeStateCounts.getOrDefault("Delhi", 0L) + 1L, stateCounts.get("Delhi"));
     }
+
+    @Test
+    void shouldSupportUc20AddContactToDatabaseWithTransaction() {
+        Contact contact = new Contact(
+                "Rudresh", "Sharma", "Street 1", "Indore", "MP", "452001", "9000000001", "rudresh@gmail.com"
+        );
+
+        Map<String, String> response = controller.addContactToDatabase("TransactionalBookUc20", contact);
+        Contact dbContact = controller.getContactFromDatabase("TransactionalBookUc20", "Rudresh");
+
+        assertEquals("Contact added to database successfully", response.get("message"));
+        assertEquals(contact, dbContact);
+    }
 }
