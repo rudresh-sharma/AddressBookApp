@@ -36,6 +36,9 @@ class AddressBookControllerTest {
         Map<String, Long> cityCount = controller.countByCity();
         Map<String, Long> stateCount = controller.countByState();
         List<Contact> sortedByName = controller.getAllContactsSortedByName();
+        List<Contact> sortedByCity = controller.getAllContactsSortedByCity();
+        List<Contact> sortedByState = controller.getAllContactsSortedByState();
+        List<Contact> sortedByZip = controller.getAllContactsSortedByZip();
 
         assertEquals(2, byCity.size());
         assertEquals(2, byState.size());
@@ -45,6 +48,9 @@ class AddressBookControllerTest {
         assertEquals(2L, stateCount.get("Delhi"));
         assertEquals("Aman", sortedByName.get(0).getFirstName());
         assertEquals("Ravi", sortedByName.get(1).getFirstName());
+        assertEquals("Delhi", sortedByCity.get(0).getCity());
+        assertEquals("Delhi", sortedByState.get(0).getState());
+        assertEquals("110001", sortedByZip.get(0).getZip());
         assertTrue(controller.getAddressBooks().contains("Personal"));
     }
 }

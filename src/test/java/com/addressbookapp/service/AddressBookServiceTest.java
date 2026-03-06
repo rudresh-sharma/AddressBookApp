@@ -122,4 +122,27 @@ class AddressBookServiceTest {
         assertEquals("Ankit", sorted.get(1).getFirstName());
         assertEquals("Ravi", sorted.get(2).getFirstName());
     }
+
+    @Test
+    void givenContacts_whenSortedByCityStateZip_shouldReturnExpectedOrder() {
+        service.addContact("Default", new Contact("Ravi", "Kumar", "Addr1", "Delhi", "Delhi", "110002", "9999999999", "ravi@gmail.com"));
+        service.addContact("Default", new Contact("Aman", "Verma", "Addr2", "Indore", "MP", "452001", "8888888888", "aman@gmail.com"));
+        service.addContact("Default", new Contact("Ankit", "Sharma", "Addr3", "Bhopal", "MP", "462001", "7777777777", "ankit@gmail.com"));
+
+        List<Contact> sortedByCity = service.getContactsSortedByCity("Default");
+        List<Contact> sortedByState = service.getContactsSortedByState("Default");
+        List<Contact> sortedByZip = service.getContactsSortedByZip("Default");
+
+        assertEquals("Bhopal", sortedByCity.get(0).getCity());
+        assertEquals("Delhi", sortedByCity.get(1).getCity());
+        assertEquals("Indore", sortedByCity.get(2).getCity());
+
+        assertEquals("Delhi", sortedByState.get(0).getState());
+        assertEquals("MP", sortedByState.get(1).getState());
+        assertEquals("MP", sortedByState.get(2).getState());
+
+        assertEquals("110002", sortedByZip.get(0).getZip());
+        assertEquals("452001", sortedByZip.get(1).getZip());
+        assertEquals("462001", sortedByZip.get(2).getZip());
+    }
 }
