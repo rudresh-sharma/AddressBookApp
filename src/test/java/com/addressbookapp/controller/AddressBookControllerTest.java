@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import com.addressbookapp.model.Contact;
+import com.addressbookapp.service.AddressBookDbService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +19,9 @@ class AddressBookControllerTest {
 
     @Autowired
     private AddressBookController controller;
+
+    @Autowired
+    private AddressBookDbService dbService;
 
     @Test
     void shouldSupportUc8AndUc9Views() {
@@ -108,5 +112,19 @@ class AddressBookControllerTest {
         } finally {
             Files.deleteIfExists(tempFile);
         }
+    }
+
+    @Test
+    void shouldSupportUc16RetrieveAllEntriesFromDb() {
+        dbService.saveAddressBookWithContacts("DbBook", List.of(
+                new Contact("Rudresh", "Sharma", "DB Street 1", "Indore", "MP", "452001", "9000000001", "rudresh@gmail.com"),
+                new Contact("Aman", "Verma", "DB Street 2", "Bhopal", "MP", "462001", "9000000002", "aman@gmail.com")
+        ));
+
+        List<Contact> dbContacts = controller.getAllEntriesFromDatabase();
+
+        assertTrue(dbContacts.size() >= 2);
+        assertTrue(dbContacts.stream().anyMatch(contact -> "Rudresh".equals(contact.getFirstName())));
+        assertTrue(dbContacts.stream().anyMatch(contact -> "Aman".equals(contact.getFirstName())));
     }
 }

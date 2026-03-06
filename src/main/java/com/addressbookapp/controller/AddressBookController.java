@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.addressbookapp.model.Contact;
+import com.addressbookapp.service.AddressBookDbService;
 import com.addressbookapp.service.AddressBookService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,9 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AddressBookController {
 
     private final AddressBookService addressBookService;
+    private final AddressBookDbService addressBookDbService;
 
-    public AddressBookController(AddressBookService addressBookService) {
+    public AddressBookController(AddressBookService addressBookService, AddressBookDbService addressBookDbService) {
         this.addressBookService = addressBookService;
+        this.addressBookDbService = addressBookDbService;
     }
 
     @PostMapping("/{name}")
@@ -91,6 +94,11 @@ public class AddressBookController {
     @GetMapping("/contacts/sort/zip")
     public List<Contact> getAllContactsSortedByZip() {
         return addressBookService.getAllContactsSortedByZip();
+    }
+
+    @GetMapping("/db/contacts")
+    public List<Contact> getAllEntriesFromDatabase() {
+        return addressBookDbService.retrieveAllEntriesFromDb();
     }
 
     @GetMapping("/{name}/contacts")
