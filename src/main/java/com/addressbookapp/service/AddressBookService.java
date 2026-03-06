@@ -18,6 +18,18 @@ public class AddressBookService {
     private static final Comparator<Contact> NAME_COMPARATOR = Comparator
             .comparing(Contact::getFirstName, String.CASE_INSENSITIVE_ORDER)
             .thenComparing(Contact::getLastName, String.CASE_INSENSITIVE_ORDER);
+    private static final Comparator<Contact> CITY_COMPARATOR = Comparator
+            .comparing(Contact::getCity, String.CASE_INSENSITIVE_ORDER)
+            .thenComparing(Contact::getFirstName, String.CASE_INSENSITIVE_ORDER)
+            .thenComparing(Contact::getLastName, String.CASE_INSENSITIVE_ORDER);
+    private static final Comparator<Contact> STATE_COMPARATOR = Comparator
+            .comparing(Contact::getState, String.CASE_INSENSITIVE_ORDER)
+            .thenComparing(Contact::getFirstName, String.CASE_INSENSITIVE_ORDER)
+            .thenComparing(Contact::getLastName, String.CASE_INSENSITIVE_ORDER);
+    private static final Comparator<Contact> ZIP_COMPARATOR = Comparator
+            .comparing(Contact::getZip, String.CASE_INSENSITIVE_ORDER)
+            .thenComparing(Contact::getFirstName, String.CASE_INSENSITIVE_ORDER)
+            .thenComparing(Contact::getLastName, String.CASE_INSENSITIVE_ORDER);
 
     private final Map<String, AddressBook> addressBookMap = new HashMap<>();
 
@@ -88,6 +100,60 @@ public class AddressBookService {
         return addressBookMap.values().stream()
                 .flatMap(addressBook -> addressBook.getContactList().stream())
                 .sorted(NAME_COMPARATOR)
+                .toList();
+    }
+
+    public List<Contact> getContactsSortedByCity(String addressBookName) {
+        AddressBook addressBook = addressBookMap.get(addressBookName);
+        if (addressBook == null) {
+            return List.of();
+        }
+
+        return addressBook.getContactList().stream()
+                .sorted(CITY_COMPARATOR)
+                .toList();
+    }
+
+    public List<Contact> getContactsSortedByState(String addressBookName) {
+        AddressBook addressBook = addressBookMap.get(addressBookName);
+        if (addressBook == null) {
+            return List.of();
+        }
+
+        return addressBook.getContactList().stream()
+                .sorted(STATE_COMPARATOR)
+                .toList();
+    }
+
+    public List<Contact> getContactsSortedByZip(String addressBookName) {
+        AddressBook addressBook = addressBookMap.get(addressBookName);
+        if (addressBook == null) {
+            return List.of();
+        }
+
+        return addressBook.getContactList().stream()
+                .sorted(ZIP_COMPARATOR)
+                .toList();
+    }
+
+    public List<Contact> getAllContactsSortedByCity() {
+        return addressBookMap.values().stream()
+                .flatMap(addressBook -> addressBook.getContactList().stream())
+                .sorted(CITY_COMPARATOR)
+                .toList();
+    }
+
+    public List<Contact> getAllContactsSortedByState() {
+        return addressBookMap.values().stream()
+                .flatMap(addressBook -> addressBook.getContactList().stream())
+                .sorted(STATE_COMPARATOR)
+                .toList();
+    }
+
+    public List<Contact> getAllContactsSortedByZip() {
+        return addressBookMap.values().stream()
+                .flatMap(addressBook -> addressBook.getContactList().stream())
+                .sorted(ZIP_COMPARATOR)
                 .toList();
     }
     
