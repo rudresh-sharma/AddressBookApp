@@ -118,4 +118,19 @@ class AddressBookDbServiceTest {
         assertFalse(dbService.addContactToAddressBookDb("TransactionalBookDup", contact));
         assertEquals(1, contactRepository.count());
     }
+
+    @Test
+    void givenMultipleContacts_whenAddedWithThreads_shouldPersistAllUniqueEntries() {
+        List<Contact> contacts = List.of(
+                new Contact("Rudresh", "Sharma", "Street 1", "Indore", "MP", "452001", "9000000001", "rudresh@gmail.com"),
+                new Contact("Aman", "Verma", "Street 2", "Bhopal", "MP", "462001", "9000000002", "aman@gmail.com"),
+                new Contact("Ravi", "Kumar", "Street 3", "Delhi", "Delhi", "110001", "9000000003", "ravi@gmail.com")
+        );
+
+        int addedCount = dbService.addContactsToAddressBookDbUsingThreads("ThreadBook", contacts);
+
+        assertEquals(3, addedCount);
+        assertEquals(3, contactRepository.count());
+        assertTrue(addressBookRepository.findByName("ThreadBook").isPresent());
+    }
 }
