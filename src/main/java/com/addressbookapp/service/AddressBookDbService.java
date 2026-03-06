@@ -7,23 +7,32 @@ import com.addressbookapp.repository.AddressBookRepository;
 import com.addressbookapp.repository.ContactRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class AddressBookDbService {
 
     private final AddressBookRepository addressBookRepository;
     private final ContactRepository contactRepository;
+    private final TransactionTemplate transactionTemplate;
 
-    public AddressBookDbService(AddressBookRepository addressBookRepository, ContactRepository contactRepository) {
+    public AddressBookDbService(AddressBookRepository addressBookRepository,
+                                ContactRepository contactRepository,
+                                TransactionTemplate transactionTemplate) {
         this.addressBookRepository = addressBookRepository;
         this.contactRepository = contactRepository;
+        this.transactionTemplate = transactionTemplate;
     }
 
     @Transactional(readOnly = true)
@@ -85,6 +94,43 @@ public class AddressBookDbService {
 
     @Transactional
     public boolean addContactToAddressBookDb(String addressBookName, Contact contact) {
+        return addContactToAddressBookDbInternal(addressBookName, contact);
+    }
+
+    public int addContactsToAddressBookDbUsingThreads(String addressBookName, List<Contact> contacts) {
+        if (contacts == null || contacts.isEmpty()) {
+            return 0;
+        }
+
+        // Ensure address book exists before parallel inserts to avoid duplicate creation races.
+        transactionTemplate.execute(status -> {
+            addressBookRepository.findByName(addressBookName)
+                    .orElseGet(() -> addressBookRepository.save(new AddressBookEntity(addressBookName)));
+            return null;
+        });
+
+        int poolSize = Math.min(contacts.size(), 4);
+        ExecutorService executor = Executors.newFixedThreadPool(poolSize);
+        try {
+            List<CompletableFuture<Integer>> futures = new ArrayList<>();
+            for (Contact contact : contacts) {
+                CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() ->
+                        transactionTemplate.execute(status ->
+                                addContactToAddressBookDbInternal(addressBookName, contact) ? 1 : 0), executor);
+                futures.add(future);
+            }
+
+            int addedCount = 0;
+            for (CompletableFuture<Integer> future : futures) {
+                addedCount += future.join();
+            }
+            return addedCount;
+        } finally {
+            executor.shutdown();
+        }
+    }
+
+    private boolean addContactToAddressBookDbInternal(String addressBookName, Contact contact) {
         Optional<ContactEntity> existingContact =
                 contactRepository.findFirstByAddressBook_NameIgnoreCaseAndFirstNameIgnoreCaseAndLastNameIgnoreCase(
                         addressBookName, contact.getFirstName(), contact.getLastName());
@@ -105,8 +151,8 @@ public class AddressBookDbService {
                 contact.getPhoneNumber(),
                 contact.getEmail()
         );
-        addressBook.addContact(contactEntity);
-        addressBookRepository.save(addressBook);
+        contactEntity.setAddressBook(addressBook);
+        contactRepository.save(contactEntity);
         return true;
     }
 
