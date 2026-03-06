@@ -10,7 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -38,6 +40,28 @@ public class AddressBookDbService {
         return contactRepository.findByDateAddedBetween(startDateTime, endDateTime).stream()
                 .map(this::toModel)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Long> getPersonCountByCityFromDb() {
+        Map<String, Long> result = new LinkedHashMap<>();
+        for (Object[] row : contactRepository.countContactsByCity()) {
+            String city = (String) row[0];
+            Long count = (Long) row[1];
+            result.put(city, count);
+        }
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Long> getPersonCountByStateFromDb() {
+        Map<String, Long> result = new LinkedHashMap<>();
+        for (Object[] row : contactRepository.countContactsByState()) {
+            String state = (String) row[0];
+            Long count = (Long) row[1];
+            result.put(state, count);
+        }
+        return result;
     }
 
     @Transactional
