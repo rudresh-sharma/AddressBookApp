@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -76,5 +77,22 @@ class AddressBookDbServiceTest {
 
         assertTrue(todayContacts.size() >= 2);
         assertEquals(0, oldRangeContacts.size());
+    }
+
+    @Test
+    void givenContacts_whenCountedByCityAndStateInDb_shouldReturnExpectedCounts() {
+        dbService.saveAddressBookWithContacts("CountBook", List.of(
+                new Contact("Rudresh", "Sharma", "Street 1", "Indore", "MP", "452001", "9000000001", "rudresh@gmail.com"),
+                new Contact("Aman", "Verma", "Street 2", "Indore", "MP", "452002", "9000000002", "aman@gmail.com"),
+                new Contact("Ravi", "Kumar", "Street 3", "Delhi", "Delhi", "110001", "9000000003", "ravi@gmail.com")
+        ));
+
+        Map<String, Long> cityCounts = dbService.getPersonCountByCityFromDb();
+        Map<String, Long> stateCounts = dbService.getPersonCountByStateFromDb();
+
+        assertEquals(2L, cityCounts.get("Indore"));
+        assertEquals(1L, cityCounts.get("Delhi"));
+        assertEquals(2L, stateCounts.get("MP"));
+        assertEquals(1L, stateCounts.get("Delhi"));
     }
 }
