@@ -2,6 +2,8 @@ package com.addressbookapp.service;
 
 import java.util.List;
 import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import com.addressbookapp.model.Contact;
 import org.junit.jupiter.api.BeforeEach;
@@ -144,5 +146,24 @@ class AddressBookServiceTest {
         assertEquals("110002", sortedByZip.get(0).getZip());
         assertEquals("452001", sortedByZip.get(1).getZip());
         assertEquals("462001", sortedByZip.get(2).getZip());
+    }
+
+    @Test
+    void givenAddressBook_whenWrittenAndReadViaFileIo_shouldPersistContacts() throws Exception {
+        service.addContact("Default", new Contact("Aman", "Verma", "Street 1", "Indore", "MP", "452001", "9000000001", "aman@gmail.com"));
+        service.addContact("Default", new Contact("Ravi", "Kumar", "Street 2", "Delhi", "Delhi", "110001", "9000000002", "ravi@gmail.com"));
+        service.addAddressBook("Imported");
+
+        Path tempFile = Files.createTempFile("addressbook-uc13-", ".txt");
+        try {
+            boolean written = service.writeContactsToFile("Default", tempFile.toString());
+            int addedCount = service.readContactsFromFile("Imported", tempFile.toString());
+
+            assertTrue(written);
+            assertEquals(2, addedCount);
+            assertEquals(2, service.getContacts("Imported").size());
+        } finally {
+            Files.deleteIfExists(tempFile);
+        }
     }
 }

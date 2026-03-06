@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import com.addressbookapp.model.Contact;
 import org.junit.jupiter.api.Test;
@@ -52,5 +54,31 @@ class AddressBookControllerTest {
         assertEquals("Delhi", sortedByState.get(0).getState());
         assertEquals("110001", sortedByZip.get(0).getZip());
         assertTrue(controller.getAddressBooks().contains("Personal"));
+    }
+
+    @Test
+    void shouldSupportUc13FileReadWrite() throws Exception {
+        controller.addAddressBook("FileBook");
+        controller.addAddressBook("ImportedFileBook");
+        controller.addContact("FileBook", new Contact(
+                "Aman", "Verma", "Street 1", "Indore", "MP", "452001", "9000000001", "aman@gmail.com"
+        ));
+        controller.addContact("FileBook", new Contact(
+                "Ravi", "Kumar", "Street 2", "Delhi", "Delhi", "110001", "9000000002", "ravi@gmail.com"
+        ));
+
+        Path tempFile = Files.createTempFile("addressbook-controller-uc13-", ".txt");
+        try {
+            Map<String, String> writeResponse = controller.writeContactsToFile("FileBook", tempFile.toString());
+            Map<String, String> readResponse = controller.readContactsFromFile("ImportedFileBook", tempFile.toString());
+            List<Contact> importedContacts = controller.getContacts("ImportedFileBook");
+
+            assertEquals("Contacts written to file successfully", writeResponse.get("message"));
+            assertEquals("Contacts read from file successfully", readResponse.get("message"));
+            assertEquals("2", readResponse.get("addedCount"));
+            assertEquals(2, importedContacts.size());
+        } finally {
+            Files.deleteIfExists(tempFile);
+        }
     }
 }
