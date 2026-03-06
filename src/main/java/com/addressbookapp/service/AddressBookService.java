@@ -7,10 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
 
+import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
+import com.opencsv.exceptions.CsvValidationException;
 import com.addressbookapp.model.AddressBook;
 import com.addressbookapp.model.Contact;
 import org.springframework.stereotype.Service;
@@ -35,8 +39,6 @@ public class AddressBookService {
             .thenComparing(Contact::getLastName, String.CASE_INSENSITIVE_ORDER);
 
     private final Map<String, AddressBook> addressBookMap = new HashMap<>();
-
-    private static final String FILE_SEPARATOR = "\\|";
 
     public boolean addAddressBook(String name) {
 
@@ -202,17 +204,27 @@ public class AddressBookService {
             return false;
         }
 
-        List<String> lines = addressBook.getContactList().stream()
-                .map(this::serializeContact)
-                .toList();
-
         try {
             Path path = Path.of(filePath);
             Path parent = path.getParent();
             if (parent != null) {
                 Files.createDirectories(parent);
             }
-            Files.write(path, lines);
+
+            try (CSVWriter writer = new CSVWriter(Files.newBufferedWriter(path, StandardCharsets.UTF_8))) {
+                for (Contact contact : addressBook.getContactList()) {
+                    writer.writeNext(new String[]{
+                            safe(contact.getFirstName()),
+                            safe(contact.getLastName()),
+                            safe(contact.getAddress()),
+                            safe(contact.getCity()),
+                            safe(contact.getState()),
+                            safe(contact.getZip()),
+                            safe(contact.getPhoneNumber()),
+                            safe(contact.getEmail())
+                    });
+                }
+            }
             return true;
         } catch (IOException e) {
             return false;
@@ -225,15 +237,15 @@ public class AddressBookService {
             return -1;
         }
 
-        try {
-            List<String> lines = Files.readAllLines(Path.of(filePath));
+        try (CSVReader reader = new CSVReader(Files.newBufferedReader(Path.of(filePath), StandardCharsets.UTF_8))) {
             int addedCount = 0;
-            for (String line : lines) {
-                if (line == null || line.isBlank()) {
+            String[] row;
+            while ((row = reader.readNext()) != null) {
+                if (row.length == 0) {
                     continue;
                 }
                 try {
-                    Contact contact = deserializeContact(line);
+                    Contact contact = deserializeContact(row);
                     if (addressBook.addContact(contact)) {
                         addedCount++;
                     }
@@ -242,31 +254,24 @@ public class AddressBookService {
                 }
             }
             return addedCount;
-        } catch (IOException e) {
+        } catch (IOException | CsvValidationException e) {
             return -1;
         }
     }
 
-    private String serializeContact(Contact contact) {
-        return String.join("|",
-                safe(contact.getFirstName()),
-                safe(contact.getLastName()),
-                safe(contact.getAddress()),
-                safe(contact.getCity()),
-                safe(contact.getState()),
-                safe(contact.getZip()),
-                safe(contact.getPhoneNumber()),
-                safe(contact.getEmail()));
-    }
-
-    private Contact deserializeContact(String line) {
-        String[] parts = line.split(FILE_SEPARATOR, -1);
-        if (parts.length < 8) {
+    private Contact deserializeContact(String[] row) {
+        if (row.length < 8) {
             throw new IllegalArgumentException("Invalid contact line");
         }
         return new Contact(
-                parts[0], parts[1], parts[2], parts[3],
-                parts[4], parts[5], parts[6], parts[7]
+                safe(row[0]),
+                safe(row[1]),
+                safe(row[2]),
+                safe(row[3]),
+                safe(row[4]),
+                safe(row[5]),
+                safe(row[6]),
+                safe(row[7])
         );
     }
 
