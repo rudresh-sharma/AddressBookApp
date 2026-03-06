@@ -10,6 +10,8 @@ import java.util.Optional;
 
 public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
     Optional<ContactEntity> findFirstByAddressBook_NameIgnoreCaseAndFirstNameIgnoreCase(String addressBookName, String firstName);
+    Optional<ContactEntity> findFirstByAddressBook_NameIgnoreCaseAndFirstNameIgnoreCaseAndLastNameIgnoreCase(
+            String addressBookName, String firstName, String lastName);
     List<ContactEntity> findByDateAddedBetween(LocalDateTime start, LocalDateTime end);
 
     @Query("select c.city, count(c) from ContactEntity c group by c.city")
