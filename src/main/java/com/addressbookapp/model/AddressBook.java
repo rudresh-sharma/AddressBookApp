@@ -18,7 +18,9 @@ public class AddressBook {
     public boolean addContact(Contact newContact) {
 
         boolean exists = contactList.stream()
-                .anyMatch(contact -> contact.equals(newContact));
+                .anyMatch(contact ->
+                        contact.getFirstName().equalsIgnoreCase(newContact.getFirstName()) &&
+                        contact.getLastName().equalsIgnoreCase(newContact.getLastName()));
 
         if (exists) {
             System.out.println("Duplicate contact found. Cannot add!");

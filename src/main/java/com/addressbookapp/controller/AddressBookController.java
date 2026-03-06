@@ -101,6 +101,12 @@ public class AddressBookController {
         return addressBookDbService.retrieveAllEntriesFromDb();
     }
 
+    @GetMapping("/{name}/db/contacts/{firstName}")
+    public Contact getContactFromDatabase(@PathVariable String name,
+                                          @PathVariable String firstName) {
+        return addressBookDbService.getContactFromDb(name, firstName);
+    }
+
     @GetMapping("/{name}/contacts")
     public List<Contact> getContacts(@PathVariable String name) {
         List<Contact> contacts = addressBookService.getContacts(name);
@@ -189,6 +195,28 @@ public class AddressBookController {
         return updated
                 ? Map.of("message", "Contact updated successfully")
                 : Map.of("message", "Contact or Address Book not found");
+    }
+
+    @PutMapping("/{name}/contacts/{firstName}/sync-db")
+    public Map<String, String> updateContactAndSyncWithDb(@PathVariable String name,
+                                                          @PathVariable String firstName,
+                                                          @RequestBody Contact updatedContact) {
+        boolean memoryUpdated = addressBookService.editContact(name, firstName, updatedContact);
+        boolean dbUpdated = addressBookDbService.updateContactInDb(name, firstName, updatedContact);
+
+        if (!memoryUpdated || !dbUpdated) {
+            return Map.of("message", "Contact not found in memory or DB");
+        }
+
+        Contact memoryContact = addressBookService.getContacts(name).stream()
+                .filter(contact -> contact.getFirstName().equalsIgnoreCase(firstName))
+                .findFirst()
+                .orElse(null);
+        boolean inSync = memoryContact != null && addressBookDbService.isMemoryInSyncWithDb(name, firstName, memoryContact);
+
+        return inSync
+                ? Map.of("message", "Contact updated and memory is in sync with DB")
+                : Map.of("message", "Contact updated but memory is not in sync with DB");
     }
 
     @DeleteMapping("/{name}/contacts/{firstName}")

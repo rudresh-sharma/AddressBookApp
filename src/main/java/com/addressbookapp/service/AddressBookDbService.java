@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AddressBookDbService {
@@ -45,6 +46,39 @@ public class AddressBookDbService {
             addressBook.addContact(entity);
         }
         return addressBookRepository.save(addressBook);
+    }
+
+    @Transactional(readOnly = true)
+    public Contact getContactFromDb(String addressBookName, String firstName) {
+        return contactRepository.findFirstByAddressBook_NameIgnoreCaseAndFirstNameIgnoreCase(addressBookName, firstName)
+                .map(this::toModel)
+                .orElse(null);
+    }
+
+    @Transactional
+    public boolean updateContactInDb(String addressBookName, String firstName, Contact updatedContact) {
+        Optional<ContactEntity> contactOptional =
+                contactRepository.findFirstByAddressBook_NameIgnoreCaseAndFirstNameIgnoreCase(addressBookName, firstName);
+
+        if (contactOptional.isEmpty()) {
+            return false;
+        }
+
+        ContactEntity contact = contactOptional.get();
+        contact.setAddress(updatedContact.getAddress());
+        contact.setCity(updatedContact.getCity());
+        contact.setState(updatedContact.getState());
+        contact.setZip(updatedContact.getZip());
+        contact.setPhoneNumber(updatedContact.getPhoneNumber());
+        contact.setEmail(updatedContact.getEmail());
+        contactRepository.save(contact);
+        return true;
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isMemoryInSyncWithDb(String addressBookName, String firstName, Contact memoryContact) {
+        Contact dbContact = getContactFromDb(addressBookName, firstName);
+        return dbContact != null && dbContact.equals(memoryContact);
     }
 
     private Contact toModel(ContactEntity entity) {

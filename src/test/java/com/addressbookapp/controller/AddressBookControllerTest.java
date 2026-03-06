@@ -127,4 +127,25 @@ class AddressBookControllerTest {
         assertTrue(dbContacts.stream().anyMatch(contact -> "Rudresh".equals(contact.getFirstName())));
         assertTrue(dbContacts.stream().anyMatch(contact -> "Aman".equals(contact.getFirstName())));
     }
+
+    @Test
+    void shouldSupportUc17UpdateAndSyncMemoryWithDb() {
+        controller.addAddressBook("SyncBookUc17");
+        controller.addContact("SyncBookUc17", new Contact(
+                "Rudresh", "Sharma", "Old Address", "Indore", "MP", "452001", "9000000001", "old@mail.com"
+        ));
+        dbService.saveAddressBookWithContacts("SyncBookUc17", List.of(
+                new Contact("Rudresh", "Sharma", "Old Address", "Indore", "MP", "452001", "9000000001", "old@mail.com")
+        ));
+
+        Contact updatedContact = new Contact(
+                "Rudresh", "Sharma", "New Address", "Pune", "MH", "411001", "9000000999", "new@mail.com"
+        );
+
+        Map<String, String> response = controller.updateContactAndSyncWithDb("SyncBookUc17", "Rudresh", updatedContact);
+        Contact dbContact = controller.getContactFromDatabase("SyncBookUc17", "Rudresh");
+
+        assertEquals("Contact updated and memory is in sync with DB", response.get("message"));
+        assertEquals(updatedContact, dbContact);
+    }
 }

@@ -44,4 +44,19 @@ class AddressBookDbServiceTest {
         assertTrue(contacts.stream().anyMatch(contact -> "Rudresh".equals(contact.getFirstName())));
         assertTrue(contacts.stream().anyMatch(contact -> "Aman".equals(contact.getFirstName())));
     }
+
+    @Test
+    void givenPersonContact_whenUpdated_shouldSyncWithDb() {
+        dbService.saveAddressBookWithContacts("SyncDb", List.of(
+                new Contact("Rudresh", "Sharma", "Old Address", "Indore", "MP", "452001", "9000000001", "old@mail.com")
+        ));
+
+        Contact updated = new Contact("Rudresh", "Sharma", "New Address", "Pune", "MH", "411001", "9000000999", "new@mail.com");
+        boolean updatedInDb = dbService.updateContactInDb("SyncDb", "Rudresh", updated);
+        Contact fromDb = dbService.getContactFromDb("SyncDb", "Rudresh");
+
+        assertTrue(updatedInDb);
+        assertEquals(updated, fromDb);
+        assertTrue(dbService.isMemoryInSyncWithDb("SyncDb", "Rudresh", updated));
+    }
 }

@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -37,12 +39,41 @@ public class Contact {
 
 	    Contact contact = (Contact) obj;
 
-	    return this.firstName.equalsIgnoreCase(contact.firstName) &&
-	           this.lastName.equalsIgnoreCase(contact.lastName);
+	    return equalsIgnoreCase(firstName, contact.firstName) &&
+               equalsIgnoreCase(lastName, contact.lastName) &&
+               equalsIgnoreCase(address, contact.address) &&
+               equalsIgnoreCase(city, contact.city) &&
+               equalsIgnoreCase(state, contact.state) &&
+               equalsIgnoreCase(zip, contact.zip) &&
+               equalsIgnoreCase(phoneNumber, contact.phoneNumber) &&
+               equalsIgnoreCase(email, contact.email);
 	}
 
 	@Override
 	public int hashCode() {
-	    return (firstName.toLowerCase() + lastName.toLowerCase()).hashCode();
+	    return Objects.hash(
+                normalize(firstName),
+                normalize(lastName),
+                normalize(address),
+                normalize(city),
+                normalize(state),
+                normalize(zip),
+                normalize(phoneNumber),
+                normalize(email)
+        );
 	}
+
+    private static boolean equalsIgnoreCase(String a, String b) {
+        if (a == null && b == null) {
+            return true;
+        }
+        if (a == null || b == null) {
+            return false;
+        }
+        return a.equalsIgnoreCase(b);
+    }
+
+    private static String normalize(String value) {
+        return value == null ? "" : value.toLowerCase();
+    }
 }
