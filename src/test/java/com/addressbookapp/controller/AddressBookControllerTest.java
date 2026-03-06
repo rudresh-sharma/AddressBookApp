@@ -61,13 +61,13 @@ class AddressBookControllerTest {
         controller.addAddressBook("FileBook");
         controller.addAddressBook("ImportedFileBook");
         controller.addContact("FileBook", new Contact(
-                "Aman", "Verma", "Street 1", "Indore", "MP", "452001", "9000000001", "aman@gmail.com"
+                "Aman", "Verma", "Street 1, Sector A", "Indore", "MP", "452001", "9000000001", "aman@gmail.com"
         ));
         controller.addContact("FileBook", new Contact(
                 "Ravi", "Kumar", "Street 2", "Delhi", "Delhi", "110001", "9000000002", "ravi@gmail.com"
         ));
 
-        Path tempFile = Files.createTempFile("addressbook-controller-uc13-", ".txt");
+        Path tempFile = Files.createTempFile("addressbook-controller-uc14-", ".csv");
         try {
             Map<String, String> writeResponse = controller.writeContactsToFile("FileBook", tempFile.toString());
             Map<String, String> readResponse = controller.readContactsFromFile("ImportedFileBook", tempFile.toString());
@@ -77,6 +77,7 @@ class AddressBookControllerTest {
             assertEquals("Contacts read from file successfully", readResponse.get("message"));
             assertEquals("2", readResponse.get("addedCount"));
             assertEquals(2, importedContacts.size());
+            assertEquals("Street 1, Sector A", importedContacts.get(0).getAddress());
         } finally {
             Files.deleteIfExists(tempFile);
         }
