@@ -8,6 +8,8 @@ import com.addressbookapp.repository.ContactRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +27,15 @@ public class AddressBookDbService {
     @Transactional(readOnly = true)
     public List<Contact> retrieveAllEntriesFromDb() {
         return contactRepository.findAll().stream()
+                .map(this::toModel)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Contact> retrieveContactsAddedBetween(LocalDate fromDate, LocalDate toDate) {
+        LocalDateTime startDateTime = fromDate.atStartOfDay();
+        LocalDateTime endDateTime = toDate.plusDays(1).atStartOfDay().minusNanos(1);
+        return contactRepository.findByDateAddedBetween(startDateTime, endDateTime).stream()
                 .map(this::toModel)
                 .toList();
     }

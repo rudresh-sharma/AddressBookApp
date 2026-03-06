@@ -8,11 +8,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "contacts")
@@ -39,6 +42,9 @@ public class ContactEntity {
     private String phoneNumber;
     private String email;
 
+    @Column(name = "date_added", nullable = false)
+    private LocalDateTime dateAdded;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "address_book_id", nullable = false)
     private AddressBookEntity addressBook;
@@ -53,5 +59,12 @@ public class ContactEntity {
         this.zip = zip;
         this.phoneNumber = phoneNumber;
         this.email = email;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (dateAdded == null) {
+            dateAdded = LocalDateTime.now();
+        }
     }
 }

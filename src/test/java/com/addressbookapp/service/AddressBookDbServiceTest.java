@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,5 +59,22 @@ class AddressBookDbServiceTest {
         assertTrue(updatedInDb);
         assertEquals(updated, fromDb);
         assertTrue(dbService.isMemoryInSyncWithDb("SyncDb", "Rudresh", updated));
+    }
+
+    @Test
+    void givenContacts_whenRetrievedByDateRange_shouldReturnOnlyMatchingPeriod() {
+        dbService.saveAddressBookWithContacts("DateBook", List.of(
+                new Contact("Rudresh", "Sharma", "Street 1", "Indore", "MP", "452001", "9000000001", "rudresh@gmail.com"),
+                new Contact("Aman", "Verma", "Street 2", "Bhopal", "MP", "462001", "9000000002", "aman@gmail.com")
+        ));
+
+        List<Contact> todayContacts = dbService.retrieveContactsAddedBetween(LocalDate.now(), LocalDate.now());
+        List<Contact> oldRangeContacts = dbService.retrieveContactsAddedBetween(
+                LocalDate.of(2000, 1, 1),
+                LocalDate.of(2000, 1, 2)
+        );
+
+        assertTrue(todayContacts.size() >= 2);
+        assertEquals(0, oldRangeContacts.size());
     }
 }

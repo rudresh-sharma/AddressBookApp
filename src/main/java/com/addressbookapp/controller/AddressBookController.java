@@ -3,11 +3,13 @@ package com.addressbookapp.controller;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.time.LocalDate;
 
 import com.addressbookapp.model.Contact;
 import com.addressbookapp.service.AddressBookDbService;
 import com.addressbookapp.service.AddressBookService;
 import org.springframework.http.HttpStatus;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -99,6 +101,13 @@ public class AddressBookController {
     @GetMapping("/db/contacts")
     public List<Contact> getAllEntriesFromDatabase() {
         return addressBookDbService.retrieveAllEntriesFromDb();
+    }
+
+    @GetMapping("/db/contacts/by-date")
+    public List<Contact> getContactsAddedInPeriod(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
+        return addressBookDbService.retrieveContactsAddedBetween(fromDate, toDate);
     }
 
     @GetMapping("/{name}/db/contacts/{firstName}")

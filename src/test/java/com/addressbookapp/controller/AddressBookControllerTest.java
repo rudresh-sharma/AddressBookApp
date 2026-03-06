@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 
 import com.addressbookapp.model.Contact;
 import com.addressbookapp.service.AddressBookDbService;
@@ -147,5 +148,22 @@ class AddressBookControllerTest {
 
         assertEquals("Contact updated and memory is in sync with DB", response.get("message"));
         assertEquals(updatedContact, dbContact);
+    }
+
+    @Test
+    void shouldSupportUc18RetrieveContactsByDateRange() {
+        dbService.saveAddressBookWithContacts("DateBookUc18", List.of(
+                new Contact("Rudresh", "Sharma", "Street 1", "Indore", "MP", "452001", "9000000001", "rudresh@gmail.com"),
+                new Contact("Aman", "Verma", "Street 2", "Bhopal", "MP", "462001", "9000000002", "aman@gmail.com")
+        ));
+
+        List<Contact> todayContacts = controller.getContactsAddedInPeriod(LocalDate.now(), LocalDate.now());
+        List<Contact> oldRangeContacts = controller.getContactsAddedInPeriod(
+                LocalDate.of(2000, 1, 1),
+                LocalDate.of(2000, 1, 2)
+        );
+
+        assertTrue(todayContacts.size() >= 2);
+        assertEquals(0, oldRangeContacts.size());
     }
 }
