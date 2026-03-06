@@ -167,4 +167,24 @@ class AddressBookServiceTest {
             Files.deleteIfExists(tempFile);
         }
     }
+
+    @Test
+    void givenAddressBook_whenWrittenAndReadViaJsonIo_shouldPersistContacts() throws Exception {
+        service.addContact("Default", new Contact("Aman", "Verma", "Street 1, Sector A", "Indore", "MP", "452001", "9000000001", "aman@gmail.com"));
+        service.addContact("Default", new Contact("Ravi", "Kumar", "Street 2", "Delhi", "Delhi", "110001", "9000000002", "ravi@gmail.com"));
+        service.addAddressBook("ImportedJson");
+
+        Path tempFile = Files.createTempFile("addressbook-uc15-", ".json");
+        try {
+            boolean written = service.writeContactsToJsonFile("Default", tempFile.toString());
+            int addedCount = service.readContactsFromJsonFile("ImportedJson", tempFile.toString());
+
+            assertTrue(written);
+            assertEquals(2, addedCount);
+            assertEquals(2, service.getContacts("ImportedJson").size());
+            assertEquals("Street 1, Sector A", service.getContacts("ImportedJson").get(0).getAddress());
+        } finally {
+            Files.deleteIfExists(tempFile);
+        }
+    }
 }

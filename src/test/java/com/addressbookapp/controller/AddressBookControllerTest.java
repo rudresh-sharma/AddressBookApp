@@ -82,4 +82,31 @@ class AddressBookControllerTest {
             Files.deleteIfExists(tempFile);
         }
     }
+
+    @Test
+    void shouldSupportUc15JsonReadWrite() throws Exception {
+        controller.addAddressBook("JsonBook");
+        controller.addAddressBook("ImportedJsonBook");
+        controller.addContact("JsonBook", new Contact(
+                "Aman", "Verma", "Street 1, Sector A", "Indore", "MP", "452001", "9000000001", "aman@gmail.com"
+        ));
+        controller.addContact("JsonBook", new Contact(
+                "Ravi", "Kumar", "Street 2", "Delhi", "Delhi", "110001", "9000000002", "ravi@gmail.com"
+        ));
+
+        Path tempFile = Files.createTempFile("addressbook-controller-uc15-", ".json");
+        try {
+            Map<String, String> writeResponse = controller.writeContactsToJsonFile("JsonBook", tempFile.toString());
+            Map<String, String> readResponse = controller.readContactsFromJsonFile("ImportedJsonBook", tempFile.toString());
+            List<Contact> importedContacts = controller.getContacts("ImportedJsonBook");
+
+            assertEquals("Contacts written to JSON file successfully", writeResponse.get("message"));
+            assertEquals("Contacts read from JSON file successfully", readResponse.get("message"));
+            assertEquals("2", readResponse.get("addedCount"));
+            assertEquals(2, importedContacts.size());
+            assertEquals("Street 1, Sector A", importedContacts.get(0).getAddress());
+        } finally {
+            Files.deleteIfExists(tempFile);
+        }
+    }
 }

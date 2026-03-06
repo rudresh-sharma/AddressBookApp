@@ -15,12 +15,16 @@ import java.util.stream.Collectors;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvValidationException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.addressbookapp.model.AddressBook;
 import com.addressbookapp.model.Contact;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AddressBookService {
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private static final Comparator<Contact> NAME_COMPARATOR = Comparator
             .comparing(Contact::getFirstName, String.CASE_INSENSITIVE_ORDER)
@@ -255,6 +259,54 @@ public class AddressBookService {
             }
             return addedCount;
         } catch (IOException | CsvValidationException e) {
+            return -1;
+        }
+    }
+
+    public boolean writeContactsToJsonFile(String addressBookName, String filePath) {
+        AddressBook addressBook = addressBookMap.get(addressBookName);
+        if (addressBook == null) {
+            return false;
+        }
+
+        try {
+            Path path = Path.of(filePath);
+            Path parent = path.getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+            String json = GSON.toJson(addressBook.getContactList());
+            Files.writeString(path, json, StandardCharsets.UTF_8);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    public int readContactsFromJsonFile(String addressBookName, String filePath) {
+        AddressBook addressBook = addressBookMap.get(addressBookName);
+        if (addressBook == null) {
+            return -1;
+        }
+
+        try {
+            String json = Files.readString(Path.of(filePath), StandardCharsets.UTF_8);
+            List<Contact> contacts = GSON.fromJson(json, new TypeToken<List<Contact>>() {}.getType());
+            if (contacts == null) {
+                return 0;
+            }
+
+            int addedCount = 0;
+            for (Contact contact : contacts) {
+                if (contact == null) {
+                    continue;
+                }
+                if (addressBook.addContact(contact)) {
+                    addedCount++;
+                }
+            }
+            return addedCount;
+        } catch (Exception e) {
             return -1;
         }
     }

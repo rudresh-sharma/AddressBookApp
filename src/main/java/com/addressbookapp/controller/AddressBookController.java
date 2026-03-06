@@ -137,6 +137,24 @@ public class AddressBookController {
                 : Map.of("message", "Address Book not found or file read failed");
     }
 
+    @PostMapping("/{name}/contacts/json/write")
+    public Map<String, String> writeContactsToJsonFile(@PathVariable String name,
+                                                       @RequestParam String filePath) {
+        boolean written = addressBookService.writeContactsToJsonFile(name, filePath);
+        return written
+                ? Map.of("message", "Contacts written to JSON file successfully")
+                : Map.of("message", "Address Book not found or JSON file write failed");
+    }
+
+    @PostMapping("/{name}/contacts/json/read")
+    public Map<String, String> readContactsFromJsonFile(@PathVariable String name,
+                                                        @RequestParam String filePath) {
+        int addedCount = addressBookService.readContactsFromJsonFile(name, filePath);
+        return addedCount >= 0
+                ? Map.of("message", "Contacts read from JSON file successfully", "addedCount", String.valueOf(addedCount))
+                : Map.of("message", "Address Book not found or JSON file read failed");
+    }
+
     @PostMapping("/{name}/contacts")
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, String> addContact(@PathVariable String name, @RequestBody Contact contact) {
