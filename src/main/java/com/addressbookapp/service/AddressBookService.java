@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.stream.Collectors;
 
 import com.addressbookapp.model.AddressBook;
@@ -32,6 +35,8 @@ public class AddressBookService {
             .thenComparing(Contact::getLastName, String.CASE_INSENSITIVE_ORDER);
 
     private final Map<String, AddressBook> addressBookMap = new HashMap<>();
+
+    private static final String FILE_SEPARATOR = "\\|";
 
     public boolean addAddressBook(String name) {
 
@@ -189,5 +194,83 @@ public class AddressBookService {
     public boolean deleteContact(String addressBookName, String firstName) {
         AddressBook addressBook = addressBookMap.get(addressBookName);
         return addressBook != null && addressBook.deleteContact(firstName);
+    }
+
+    public boolean writeContactsToFile(String addressBookName, String filePath) {
+        AddressBook addressBook = addressBookMap.get(addressBookName);
+        if (addressBook == null) {
+            return false;
+        }
+
+        List<String> lines = addressBook.getContactList().stream()
+                .map(this::serializeContact)
+                .toList();
+
+        try {
+            Path path = Path.of(filePath);
+            Path parent = path.getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+            Files.write(path, lines);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    public int readContactsFromFile(String addressBookName, String filePath) {
+        AddressBook addressBook = addressBookMap.get(addressBookName);
+        if (addressBook == null) {
+            return -1;
+        }
+
+        try {
+            List<String> lines = Files.readAllLines(Path.of(filePath));
+            int addedCount = 0;
+            for (String line : lines) {
+                if (line == null || line.isBlank()) {
+                    continue;
+                }
+                try {
+                    Contact contact = deserializeContact(line);
+                    if (addressBook.addContact(contact)) {
+                        addedCount++;
+                    }
+                } catch (IllegalArgumentException ignored) {
+                    // Skip malformed lines and continue processing remaining records.
+                }
+            }
+            return addedCount;
+        } catch (IOException e) {
+            return -1;
+        }
+    }
+
+    private String serializeContact(Contact contact) {
+        return String.join("|",
+                safe(contact.getFirstName()),
+                safe(contact.getLastName()),
+                safe(contact.getAddress()),
+                safe(contact.getCity()),
+                safe(contact.getState()),
+                safe(contact.getZip()),
+                safe(contact.getPhoneNumber()),
+                safe(contact.getEmail()));
+    }
+
+    private Contact deserializeContact(String line) {
+        String[] parts = line.split(FILE_SEPARATOR, -1);
+        if (parts.length < 8) {
+            throw new IllegalArgumentException("Invalid contact line");
+        }
+        return new Contact(
+                parts[0], parts[1], parts[2], parts[3],
+                parts[4], parts[5], parts[6], parts[7]
+        );
+    }
+
+    private String safe(String value) {
+        return value == null ? "" : value;
     }
 }
