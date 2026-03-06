@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -94,5 +95,27 @@ class AddressBookDbServiceTest {
         assertEquals(1L, cityCounts.get("Delhi"));
         assertEquals(2L, stateCounts.get("MP"));
         assertEquals(1L, stateCounts.get("Delhi"));
+    }
+
+    @Test
+    void givenNewContact_whenAddedToDb_shouldPersistWithTransactionAcrossTables() {
+        Contact contact = new Contact("Rudresh", "Sharma", "Street 1", "Indore", "MP", "452001", "9000000001", "rudresh@gmail.com");
+
+        boolean added = dbService.addContactToAddressBookDb("TransactionalBook", contact);
+        Contact fromDb = dbService.getContactFromDb("TransactionalBook", "Rudresh");
+
+        assertTrue(added);
+        assertEquals(contact, fromDb);
+        assertTrue(addressBookRepository.findByName("TransactionalBook").isPresent());
+        assertEquals(1, contactRepository.count());
+    }
+
+    @Test
+    void givenDuplicateContact_whenAddedToDb_shouldNotPersistAgain() {
+        Contact contact = new Contact("Rudresh", "Sharma", "Street 1", "Indore", "MP", "452001", "9000000001", "rudresh@gmail.com");
+
+        assertTrue(dbService.addContactToAddressBookDb("TransactionalBookDup", contact));
+        assertFalse(dbService.addContactToAddressBookDb("TransactionalBookDup", contact));
+        assertEquals(1, contactRepository.count());
     }
 }
