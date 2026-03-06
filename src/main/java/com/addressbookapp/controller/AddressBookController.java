@@ -119,6 +119,24 @@ public class AddressBookController {
         return addressBookService.getContactsSortedByZip(name);
     }
 
+    @PostMapping("/{name}/contacts/file/write")
+    public Map<String, String> writeContactsToFile(@PathVariable String name,
+                                                   @RequestParam String filePath) {
+        boolean written = addressBookService.writeContactsToFile(name, filePath);
+        return written
+                ? Map.of("message", "Contacts written to file successfully")
+                : Map.of("message", "Address Book not found or file write failed");
+    }
+
+    @PostMapping("/{name}/contacts/file/read")
+    public Map<String, String> readContactsFromFile(@PathVariable String name,
+                                                    @RequestParam String filePath) {
+        int addedCount = addressBookService.readContactsFromFile(name, filePath);
+        return addedCount >= 0
+                ? Map.of("message", "Contacts read from file successfully", "addedCount", String.valueOf(addedCount))
+                : Map.of("message", "Address Book not found or file read failed");
+    }
+
     @PostMapping("/{name}/contacts")
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, String> addContact(@PathVariable String name, @RequestBody Contact contact) {
