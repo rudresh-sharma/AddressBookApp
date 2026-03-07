@@ -216,6 +216,16 @@ public class AddressBookController {
                 : Map.of("message", "Contact not found in memory or JSON Server update failed");
     }
 
+    @DeleteMapping("/{name}/contacts/{firstName}/json-server/sync")
+    public Map<String, String> deleteContactInJsonServerAndSyncMemory(@PathVariable String name,
+                                                                      @PathVariable String firstName,
+                                                                      @RequestParam String serverUrl) {
+        boolean deleted = addressBookService.deleteContactInJsonServerAndSyncMemory(name, firstName, serverUrl);
+        return deleted
+                ? Map.of("message", "Contact deleted from JSON Server and memory")
+                : Map.of("message", "Contact not found in memory or JSON Server delete failed");
+    }
+
     @PostMapping("/{name}/contacts")
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, String> addContact(@PathVariable String name, @RequestBody Contact contact) {
