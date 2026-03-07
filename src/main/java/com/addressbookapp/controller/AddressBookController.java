@@ -206,6 +206,16 @@ public class AddressBookController {
                 : Map.of("message", "Address Book not found or JSON Server add failed");
     }
 
+    @PutMapping("/{name}/contacts/{firstName}/json-server/sync")
+    public Map<String, String> updateContactInJsonServerAndSyncMemory(@PathVariable String name,
+                                                                      @PathVariable String firstName,
+                                                                      @RequestParam String serverUrl) {
+        boolean updated = addressBookService.updateContactInJsonServerAndSyncMemory(name, firstName, serverUrl);
+        return updated
+                ? Map.of("message", "Contact updated in JSON Server and synced with memory")
+                : Map.of("message", "Contact not found in memory or JSON Server update failed");
+    }
+
     @PostMapping("/{name}/contacts")
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, String> addContact(@PathVariable String name, @RequestBody Contact contact) {
