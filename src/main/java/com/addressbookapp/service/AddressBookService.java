@@ -450,6 +450,61 @@ public class AddressBookService {
         }
     }
 
+    public boolean deleteContactInJsonServerAndSyncMemory(String addressBookName, String firstName, String serverUrl) {
+        AddressBook addressBook = addressBookMap.get(addressBookName);
+        if (addressBook == null || firstName == null || firstName.isBlank()) {
+            return false;
+        }
+
+        boolean contactPresentInMemory = addressBook.getContactList().stream()
+                .anyMatch(contact -> contact.getFirstName().equalsIgnoreCase(firstName));
+        if (!contactPresentInMemory) {
+            return false;
+        }
+
+        try {
+            String encodedFirstName = URLEncoder.encode(firstName, StandardCharsets.UTF_8);
+            String lookupUrl = serverUrl + "?firstName=" + encodedFirstName;
+            HttpClient httpClient = HttpClient.newHttpClient();
+
+            HttpRequest lookupRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(lookupUrl))
+                    .GET()
+                    .build();
+            HttpResponse<String> lookupResponse = httpClient.send(lookupRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (!isSuccessStatus(lookupResponse.statusCode())) {
+                return false;
+            }
+
+            JsonArray matches = GSON.fromJson(lookupResponse.body(), JsonArray.class);
+            if (matches == null || matches.isEmpty()) {
+                return false;
+            }
+
+            JsonObject matched = matches.get(0).getAsJsonObject();
+            JsonElement idElement = matched.get("id");
+            if (idElement == null || idElement.isJsonNull()) {
+                return false;
+            }
+
+            String id = idElement.getAsString();
+            String deleteUrl = serverUrl.endsWith("/") ? serverUrl + id : serverUrl + "/" + id;
+
+            HttpRequest deleteRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(deleteUrl))
+                    .DELETE()
+                    .build();
+            HttpResponse<String> deleteResponse = httpClient.send(deleteRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (!isSuccessStatus(deleteResponse.statusCode())) {
+                return false;
+            }
+
+            return addressBook.deleteContact(firstName);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private Contact deserializeContact(String[] row) {
         if (row.length < 8) {
             throw new IllegalArgumentException("Invalid contact line");
