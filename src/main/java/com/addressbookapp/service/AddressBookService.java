@@ -8,12 +8,16 @@ import java.util.Map;
 import java.util.Set;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.util.stream.Collectors;
 
 import com.opencsv.CSVReader;
@@ -389,6 +393,60 @@ public class AddressBookService {
             return addedCount;
         } catch (Exception e) {
             return -1;
+        }
+    }
+
+    public boolean updateContactInJsonServerAndSyncMemory(String addressBookName, String firstName, String serverUrl) {
+        AddressBook addressBook = addressBookMap.get(addressBookName);
+        if (addressBook == null || firstName == null || firstName.isBlank()) {
+            return false;
+        }
+
+        Contact memoryContact = addressBook.getContactList().stream()
+                .filter(contact -> contact.getFirstName().equalsIgnoreCase(firstName))
+                .findFirst()
+                .orElse(null);
+        if (memoryContact == null) {
+            return false;
+        }
+
+        try {
+            String encodedFirstName = URLEncoder.encode(firstName, StandardCharsets.UTF_8);
+            String lookupUrl = serverUrl + "?firstName=" + encodedFirstName;
+            HttpClient httpClient = HttpClient.newHttpClient();
+
+            HttpRequest lookupRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(lookupUrl))
+                    .GET()
+                    .build();
+            HttpResponse<String> lookupResponse = httpClient.send(lookupRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (!isSuccessStatus(lookupResponse.statusCode())) {
+                return false;
+            }
+
+            JsonArray matches = GSON.fromJson(lookupResponse.body(), JsonArray.class);
+            if (matches == null || matches.isEmpty()) {
+                return false;
+            }
+
+            JsonObject matched = matches.get(0).getAsJsonObject();
+            JsonElement idElement = matched.get("id");
+            if (idElement == null || idElement.isJsonNull()) {
+                return false;
+            }
+
+            String id = idElement.getAsString();
+            String updateUrl = serverUrl.endsWith("/") ? serverUrl + id : serverUrl + "/" + id;
+
+            HttpRequest updateRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(updateUrl))
+                    .header("Content-Type", "application/json")
+                    .PUT(HttpRequest.BodyPublishers.ofString(GSON.toJson(memoryContact), StandardCharsets.UTF_8))
+                    .build();
+            HttpResponse<String> updateResponse = httpClient.send(updateRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            return isSuccessStatus(updateResponse.statusCode());
+        } catch (Exception e) {
+            return false;
         }
     }
 
