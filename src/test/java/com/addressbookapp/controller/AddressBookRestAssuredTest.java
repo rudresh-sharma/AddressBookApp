@@ -123,6 +123,17 @@ class AddressBookRestAssuredTest {
                 return;
             }
 
+            if ("DELETE".equalsIgnoreCase(method) && path.startsWith("/contacts/")) {
+                String id = path.substring("/contacts/".length());
+                boolean removed = jsonServerContacts.removeIf(contact -> contact.get("id").equals(id));
+                if (!removed) {
+                    exchange.sendResponseHeaders(HttpStatus.NOT_FOUND.value(), -1);
+                    return;
+                }
+                writeJsonResponse(exchange, HttpStatus.OK.value(), Map.of("status", "deleted"));
+                return;
+            }
+
             exchange.sendResponseHeaders(HttpStatus.NOT_FOUND.value(), -1);
         });
         jsonServer.start();
@@ -230,6 +241,34 @@ class AddressBookRestAssuredTest {
                         && "Pune".equals(contact.get("city"))
                         && "MH".equals(contact.get("state"))
                         && "new@mail.com".equals(contact.get("email"))
+        ));
+    }
+
+    @Test
+    void shouldSupportUc25DeleteEntryInJsonServerAndSyncMemory() {
+        String addressBookName = "JsonServerBookUc25";
+        addressBookService.addAddressBook(addressBookName);
+        addressBookService.addContact(addressBookName, new Contact(
+                "Rudresh", "Sharma", "Street 1", "Indore", "MP", "452001", "9000000001", "rudresh@gmail.com"
+        ));
+
+        given()
+                .queryParam("serverUrl", jsonServerUrl)
+                .when()
+                .delete("/api/address-books/{name}/contacts/{firstName}/json-server/sync", addressBookName, "Rudresh")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .body("message", equalTo("Contact deleted from JSON Server and memory"));
+
+        given()
+                .when()
+                .get("/api/address-books/{name}/contacts", addressBookName)
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .body("size()", equalTo(0));
+
+        assertTrue(jsonServerContacts.stream().noneMatch(contact ->
+                "Rudresh".equals(contact.get("firstName"))
         ));
     }
 
