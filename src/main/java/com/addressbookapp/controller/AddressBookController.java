@@ -188,6 +188,15 @@ public class AddressBookController {
                 : Map.of("message", "Address Book not found or JSON file read failed");
     }
 
+    @PostMapping("/{name}/contacts/json-server/read")
+    public Map<String, String> readContactsFromJsonServer(@PathVariable String name,
+                                                          @RequestParam String serverUrl) {
+        int addedCount = addressBookService.readContactsFromJsonServer(name, serverUrl);
+        return addedCount >= 0
+                ? Map.of("message", "Contacts read from JSON Server successfully", "addedCount", String.valueOf(addedCount))
+                : Map.of("message", "Address Book not found or JSON Server read failed");
+    }
+
     @PostMapping("/{name}/contacts")
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, String> addContact(@PathVariable String name, @RequestBody Contact contact) {
