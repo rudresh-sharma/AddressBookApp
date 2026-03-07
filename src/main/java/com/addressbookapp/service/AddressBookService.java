@@ -354,6 +354,44 @@ public class AddressBookService {
         }
     }
 
+    public int addContactsToJsonServerAndSyncMemory(String addressBookName, String serverUrl) {
+        AddressBook addressBook = addressBookMap.get(addressBookName);
+        if (addressBook == null) {
+            return -1;
+        }
+        List<Contact> contacts = addressBook.getContactList();
+        if (contacts == null || contacts.isEmpty()) {
+            return 0;
+        }
+
+        try {
+            HttpClient httpClient = HttpClient.newHttpClient();
+            int addedCount = 0;
+
+            for (Contact contact : contacts) {
+                if (!isValidContact(contact)) {
+                    continue;
+                }
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(serverUrl))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(GSON.toJson(contact), StandardCharsets.UTF_8))
+                        .build();
+
+                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                if (!isSuccessStatus(response.statusCode())) {
+                    continue;
+                }
+
+                addedCount++;
+            }
+            return addedCount;
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
     private Contact deserializeContact(String[] row) {
         if (row.length < 8) {
             throw new IllegalArgumentException("Invalid contact line");
@@ -380,5 +418,9 @@ public class AddressBookService {
                 && !contact.getFirstName().isBlank()
                 && contact.getLastName() != null
                 && !contact.getLastName().isBlank();
+    }
+
+    private boolean isSuccessStatus(int statusCode) {
+        return statusCode >= 200 && statusCode < 300;
     }
 }
