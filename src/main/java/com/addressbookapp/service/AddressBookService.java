@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -311,6 +315,45 @@ public class AddressBookService {
         }
     }
 
+    public int readContactsFromJsonServer(String addressBookName, String serverUrl) {
+        AddressBook addressBook = addressBookMap.get(addressBookName);
+        if (addressBook == null) {
+            return -1;
+        }
+
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(serverUrl))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = HttpClient.newHttpClient()
+                    .send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                return -1;
+            }
+
+            List<Contact> contacts = GSON.fromJson(response.body(), new TypeToken<List<Contact>>() {}.getType());
+            if (contacts == null) {
+                return 0;
+            }
+
+            int addedCount = 0;
+            for (Contact contact : contacts) {
+                if (!isValidContact(contact)) {
+                    continue;
+                }
+                if (addressBook.addContact(contact)) {
+                    addedCount++;
+                }
+            }
+            return addedCount;
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
     private Contact deserializeContact(String[] row) {
         if (row.length < 8) {
             throw new IllegalArgumentException("Invalid contact line");
@@ -329,5 +372,13 @@ public class AddressBookService {
 
     private String safe(String value) {
         return value == null ? "" : value;
+    }
+
+    private boolean isValidContact(Contact contact) {
+        return contact != null
+                && contact.getFirstName() != null
+                && !contact.getFirstName().isBlank()
+                && contact.getLastName() != null
+                && !contact.getLastName().isBlank();
     }
 }
