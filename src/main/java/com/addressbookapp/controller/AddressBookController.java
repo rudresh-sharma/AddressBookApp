@@ -197,6 +197,15 @@ public class AddressBookController {
                 : Map.of("message", "Address Book not found or JSON Server read failed");
     }
 
+    @PostMapping("/{name}/contacts/json-server/add-multiple")
+    public Map<String, String> addMultipleContactsToJsonServer(@PathVariable String name,
+                                                               @RequestParam String serverUrl) {
+        int addedCount = addressBookService.addContactsToJsonServerAndSyncMemory(name, serverUrl);
+        return addedCount >= 0
+                ? Map.of("message", "Contacts added to JSON Server and synced with memory", "addedCount", String.valueOf(addedCount))
+                : Map.of("message", "Address Book not found or JSON Server add failed");
+    }
+
     @PostMapping("/{name}/contacts")
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, String> addContact(@PathVariable String name, @RequestBody Contact contact) {
